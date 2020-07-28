@@ -22,7 +22,10 @@ import random
 import numpy as np
 import tkinter as tk
 import matplotlib
+import matplotlib.pyplot as plt
 matplotlib.use("TkAgg")
+from matplotlib.backends.backend_tkagg import (FigureCanvasTkAgg, NavigationToolbar2Tk)
+from matplotlib.figure import Figure
 
 def collinear(lines):
     """
@@ -48,6 +51,44 @@ def collinear(lines):
 
     note that sets 2 and 3 only contain a single line
     """
+    lines_array = np.array(lines)
+    (n,m,w) = lines_array.shape
+    sets = []
+    length_lines_array = n
+    for l in range(n):
+        if lines_array.size == 0:
+            break
+        slope = (lines_array[0,1,1]-lines_array[0,0,1])/(lines_array[0,1,0]-lines_array[0,0,0])
+        temp_sets = np.array([lines_array[0]])
+        temp_lines = lines_array.copy()
+        temp_lines = np.delete(temp_lines, 0, axis=0)
+        d = 1
+        for x in range(1,length_lines_array):
+            try:
+                point1_slope = (lines_array[x,0,1]-lines_array[0,0,1])/(lines_array[x,0,0]-lines_array[0,0,0])
+            except ZeroDivisionError:
+                point1_slope = slope
+            try:
+                point2_slope = (lines_array[x,1,1]-lines_array[0,0,1])/(lines_array[x,1,0]-lines_array[0,0,0])
+            except ZeroDivisionError:
+                point2_slope = slope
+            print('slopes', slope, point1_slope, point2_slope)
+            if slope == point1_slope and slope == point2_slope:
+                temp_lines = np.delete(temp_lines, x-d, axis = 0)
+                d += 1
+                temp_sets = np.concatenate((temp_sets,[lines_array[x]]), axis=0)
+                print('delete line')
+        sets.append(temp_sets)
+        print('tempsetsshape', temp_sets.shape)
+        lines_array = temp_lines
+        (n,m,w) = lines_array.shape
+        length_lines_array = n
+        # print(temp_lines)
+    print('shapesets', len(sets))
+    return sets
+
+        
+
 
 def visualize(sets):
     """
@@ -56,20 +97,46 @@ def visualize(sets):
     window = tk.Tk()
     window.title('Colinear Challenge Visualization')
     window.geometry("500x500")
-    button = tk.Button(window, text = "Visualize", width=10, height = 2, command = lambda: plotLines(sets))
+    window.counter = 0
+    f = Figure(figsize=(5,5), dpi=100)
+    a = f.add_subplot(111)
+    button = tk.Button(window, text = "Visualize Next Set", width=20, height = 2, command = lambda: plotLines(sets, window, f, a))
     button.pack()
     button2 = tk.Button(window, text = "Done", width=10, height = 2, command = exit)
     button2.pack()
+    # f = Figure(figsize=(5,5), dpi=100)
+    # canvas = FigureCanvasTkAgg(f, master=window)
+    # canvas.draw()
+    # canvas.get_tk_widget().pack(side=tk.BOTTOM, fill=tk.BOTH, expand=True)
+    # toolbar = NavigationToolbar2Tk(canvas, window)
+    # toolbar.update()
+    # canvas._tkcanvas.pack(side=tk.TOP, fill=tk.BOTH, expand=True)
     window.mainloop()
 
     # fig = Figure(figsize=(5,4),dpi=100)
-def plotLines(sets):
-    f = Figure(figsize=(5,5), dpi=100)
-    a = f.add_subplot(111)
-    for s in range(len(sets)):
-        a.plot(sets[s][l])
-    print('duck')
-    print(sets)
+
+def plotLines(sets, root,f,a):
+    if root.counter < len(sets):
+        print(root.counter)
+        f.clear()
+        a.clear()
+        f = Figure(figsize=(5,5), dpi=100)
+        a = f.add_subplot(111)
+        for l in range(len(sets[root.counter])):
+            a.plot(sets[root.counter][l,:,0],sets[root.counter][l,:,1], label = 'set number'+str(root.counter))
+        a.legend()
+        canvas = FigureCanvasTkAgg(f, master=root)
+        canvas.draw()
+        canvas.get_tk_widget().pack(side=tk.BOTTOM, fill=tk.BOTH, expand=True)
+
+        toolbar = NavigationToolbar2Tk(canvas, root)
+        toolbar.update()
+        canvas._tkcanvas.pack(side=tk.TOP, fill=tk.BOTH, expand=True)
+        root.counter+=1
+
+
+
+
 
 def fill(lines, num=100):
      """
@@ -92,9 +159,8 @@ def main():
     lines = []
     fill(lines, 100)
     lines = np.array(lines)
-    print(lines[0])
-    print(np.shape(lines))
     sets = collinear(lines)
+    # print(sets)
     visualize(sets)
 
 if __name__ == "__main__":
