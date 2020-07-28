@@ -97,42 +97,28 @@ def visualize(sets):
     window = tk.Tk()
     window.title('Colinear Challenge Visualization')
     window.geometry("500x500")
-    window.counter = 0
-    f = Figure(figsize=(5,5), dpi=100)
-    a = f.add_subplot(111)
-    button = tk.Button(window, text = "Visualize Next Set", width=20, height = 2, command = lambda: plotLines(sets, window, f, a))
+    button = tk.Button(window, text = "Visualize", width=20, height = 2, command = lambda: plotLines(sets, window))
     button.pack()
     button2 = tk.Button(window, text = "Done", width=10, height = 2, command = exit)
     button2.pack()
-    # f = Figure(figsize=(5,5), dpi=100)
-    # canvas = FigureCanvasTkAgg(f, master=window)
-    # canvas.draw()
-    # canvas.get_tk_widget().pack(side=tk.BOTTOM, fill=tk.BOTH, expand=True)
-    # toolbar = NavigationToolbar2Tk(canvas, window)
-    # toolbar.update()
-    # canvas._tkcanvas.pack(side=tk.TOP, fill=tk.BOTH, expand=True)
     window.mainloop()
 
     # fig = Figure(figsize=(5,4),dpi=100)
 
-def plotLines(sets, root,f,a):
-    if root.counter < len(sets):
-        print(root.counter)
-        f.clear()
-        a.clear()
-        f = Figure(figsize=(5,5), dpi=100)
-        a = f.add_subplot(111)
-        for l in range(len(sets[root.counter])):
-            a.plot(sets[root.counter][l,:,0],sets[root.counter][l,:,1], label = 'set number'+str(root.counter))
-        a.legend()
-        canvas = FigureCanvasTkAgg(f, master=root)
-        canvas.draw()
-        canvas.get_tk_widget().pack(side=tk.BOTTOM, fill=tk.BOTH, expand=True)
+def plotLines(sets, root):
+    f = Figure(figsize=(5,5), dpi=100)
+    a = f.add_subplot(111)
+    for s in range(len(sets)):
+        for l in range(len(sets[s])):
+            a.plot(sets[s][l,:,0],sets[s][l,:,1], label = 'set number'+str(s))
+    a.legend()
+    canvas = FigureCanvasTkAgg(f, master=root)
+    canvas.draw()
+    canvas.get_tk_widget().pack(side=tk.BOTTOM, fill=tk.BOTH, expand=True)
 
-        toolbar = NavigationToolbar2Tk(canvas, root)
-        toolbar.update()
-        canvas._tkcanvas.pack(side=tk.TOP, fill=tk.BOTH, expand=True)
-        root.counter+=1
+    toolbar = NavigationToolbar2Tk(canvas, root)
+    toolbar.update()
+    canvas._tkcanvas.pack(side=tk.TOP, fill=tk.BOTH, expand=True)
 
 
 
